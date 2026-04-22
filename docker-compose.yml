@@ -1,0 +1,276 @@
+version: "3.9"
+
+# =============================================================================
+# EIGEN IAM — Keycloak Central (National)
+# Ministère de l'Enseignement Supérieur — République Gabonaise
+# =============================================================================
+# Ce fichier orchestre l'ensemble du stack Keycloak Central incluant :
+#   - Keycloak (moteur d'authentification national)
+#   - PostgreSQL (persistance des données Keycloak)
+#   - Kafka + Zookeeper (transport des événements d'identité)
+#   - Vault (gestion des secrets — mode dev pour bootstrap uniquement)
+# =============================================================================
+
+networks:
+  eigen-central-net:
+    driver: bridge
+    name: eigen-central-net
+  eigen-kafka-net:
+    driver: bridge
+    name: eigen-kafka-net
+
+volumes:
+  keycloak-central-db-data:
+    name: eigen-central-postgres-data
+  kafka-central-data:
+    name: eigen-central-kafka-data
+  zookeeper-central-data:
+    name: eigen-central-zookeeper-data
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — Base de données Keycloak Central
+  # ---------------------------------------------------------------------------
+  keycloak-central-db:
+    image: postgres:16-alpine
+    container_name: eigen-central-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${KC_DB_NAME:-keycloak_central}
+      POSTGRES_USER: ${KC_DB_USER:-keycloak_central_usr}
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD:?KC_DB_PASSWORD est obligatoire}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - keycloak-central-db-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - eigen-central-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KC_DB_USER:-keycloak_central_usr} -d ${KC_DB_NAME:-keycloak_central}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      eigen.component: "keycloak-central-db"
+      eigen.tier: "national"
+
+  # ---------------------------------------------------------------------------
+  # Zookeeper — Coordinateur Kafka
+  # ---------------------------------------------------------------------------
+  zookeeper-central:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: eigen-central-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: WARN
+    volumes:
+      - zookeeper-central-data:/var/lib/zookeeper/data
+    networks:
+      - eigen-kafka-net
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      eigen.component: "zookeeper-central"
+      eigen.tier: "national"
+
+  # ---------------------------------------------------------------------------
+  # Kafka — Transport des événements d'identité EIGEN
+  # ---------------------------------------------------------------------------
+  kafka-central:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: eigen-central-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper-central:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-central:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-central:9092,PLAINTEXT_HOST://${KAFKA_EXTERNAL_HOST:-localhost}:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+    volumes:
+      - kafka-central-data:/var/lib/kafka/data
+    networks:
+      - eigen-kafka-net
+    ports:
+      - "${KAFKA_EXTERNAL_PORT:-9093}:9093"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      eigen.component: "kafka-central"
+      eigen.tier: "national"
+
+  # ---------------------------------------------------------------------------
+  # Kafka Init — Création des topics EIGEN au premier démarrage
+  # ---------------------------------------------------------------------------
+  kafka-central-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: eigen-central-kafka-init
+    depends_on:
+      kafka-central:
+        condition: service_healthy
+    networks:
+      - eigen-kafka-net
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo '=== EIGEN :: Initialisation des topics Kafka Central ==='
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.orientation.creee \
+        --partitions 6 --replication-factor 1 \
+        --config retention.ms=604800000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.transfert.creee \
+        --partitions 6 --replication-factor 1 \
+        --config retention.ms=604800000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.compte.cree \
+        --partitions 6 --replication-factor 1 \
+        --config retention.ms=604800000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.compte.modifie \
+        --partitions 6 --replication-factor 1 \
+        --config retention.ms=604800000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.compte.desactive \
+        --partitions 6 --replication-factor 1 \
+        --config retention.ms=604800000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.session.ouverte \
+        --partitions 12 --replication-factor 1 \
+        --config retention.ms=86400000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.session.fermee \
+        --partitions 12 --replication-factor 1 \
+        --config retention.ms=86400000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.authentification.echec \
+        --partitions 6 --replication-factor 1 \
+        --config retention.ms=2592000000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.sync.demandee \
+        --partitions 3 --replication-factor 1 \
+        --config retention.ms=86400000
+
+      kafka-topics --bootstrap-server kafka-central:9092 --create --if-not-exists \
+        --topic eigen.national.audit \
+        --partitions 6 --replication-factor 1 \
+        --config retention.ms=31536000000
+
+      echo '=== EIGEN :: Topics Kafka Central initialisés avec succès ==='
+      kafka-topics --bootstrap-server kafka-central:9092 --list
+      "
+    labels:
+      eigen.component: "kafka-central-init"
+      eigen.tier: "national"
+
+  # ---------------------------------------------------------------------------
+  # Keycloak Central — Moteur d'authentification national EIGEN
+  # ---------------------------------------------------------------------------
+  keycloak-central:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: eigen-keycloak-central
+    restart: unless-stopped
+    depends_on:
+      keycloak-central-db:
+        condition: service_healthy
+      kafka-central:
+        condition: service_healthy
+    command:
+      - start
+      - --optimized
+      - --import-realm
+    environment:
+      # --- Base de données ---
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-central-db:5432/${KC_DB_NAME:-keycloak_central}
+      KC_DB_USERNAME: ${KC_DB_USER:-keycloak_central_usr}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:?KC_DB_PASSWORD est obligatoire}
+      KC_DB_POOL_MIN_SIZE: 5
+      KC_DB_POOL_MAX_SIZE: 20
+
+      # --- Admin Keycloak (bootstrap uniquement) ---
+      KEYCLOAK_ADMIN: ${KC_ADMIN_USER:-eigen-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:?KC_ADMIN_PASSWORD est obligatoire}
+
+      # --- Réseau et proxy ---
+      KC_HOSTNAME: ${KC_HOSTNAME:-sso.eigen.ga}
+      KC_HOSTNAME_STRICT: "true"
+      KC_HOSTNAME_STRICT_HTTPS: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: 8080
+      KC_HTTPS_PORT: 8443
+      KC_PROXY: edge
+
+      # --- Logs ---
+      KC_LOG_LEVEL: ${KC_LOG_LEVEL:-INFO}
+      KC_LOG_CONSOLE_COLOR: "true"
+
+      # --- Health & Metrics ---
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+
+      # --- Configuration EIGEN spécifique ---
+      KC_FEATURES: token-exchange,admin-fine-grained-authz,declarative-user-profile
+
+      # --- Kafka (injectée dans les SPIs custom) ---
+      EIGEN_KAFKA_BOOTSTRAP: kafka-central:9092
+      EIGEN_KAFKA_TOPIC_PREFIX: eigen.national
+      EIGEN_ETABLISSEMENT_CODE: NATIONAL
+      EIGEN_SYSTEME_VERSION: ${EIGEN_VERSION:-1.0.0}
+
+    volumes:
+      - ./keycloak/themes/eigen-central:/opt/keycloak/themes/eigen-central:ro
+      - ./keycloak/realm-config:/opt/keycloak/data/import:ro
+      - ./keycloak/extensions:/opt/keycloak/providers:ro
+
+    networks:
+      - eigen-central-net
+      - eigen-kafka-net
+
+    ports:
+      - "${KC_HTTP_PORT_EXPOSE:-8080}:8080"
+      - "${KC_HTTPS_PORT_EXPOSE:-8443}:8443"
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+    labels:
+      eigen.component: "keycloak-central"
+      eigen.tier: "national"
+      eigen.realm: "eigen-national"
+      traefik.enable: "true"
+      traefik.http.routers.keycloak-central.rule: "Host(`${KC_HOSTNAME:-sso.eigen.ga}`)"
+      traefik.http.routers.keycloak-central.tls: "true"
+      traefik.http.services.keycloak-central.loadbalancer.server.port: "8080"

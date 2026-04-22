@@ -1,0 +1,425 @@
+/* =============================================================================
+   EIGEN IAM — Feuille de style principale :: thème eigen-central
+   Design system EIGEN — Identité Nationale de l'Enseignement Supérieur Gabonais
+   ============================================================================= */
+
+/* --- Variables CSS EIGEN --------------------------------------------------- */
+:root {
+  /* Palette principale — Vert Gabon + Bleu Professionnel */
+  --eigen-primary: #006B3C;          /* Vert Gabon */
+  --eigen-primary-dark: #004D2B;     /* Vert foncé */
+  --eigen-primary-light: #E8F5EE;    /* Vert très clair */
+  --eigen-secondary: #1A3A5C;        /* Bleu marine institutionnel */
+  --eigen-accent: #FFD700;           /* Or Gabon */
+  --eigen-accent-light: #FFF9E0;
+
+  /* Neutres */
+  --eigen-white: #FFFFFF;
+  --eigen-gray-50: #F9FAFB;
+  --eigen-gray-100: #F3F4F6;
+  --eigen-gray-200: #E5E7EB;
+  --eigen-gray-400: #9CA3AF;
+  --eigen-gray-600: #4B5563;
+  --eigen-gray-900: #111827;
+
+  /* États */
+  --eigen-error: #DC2626;
+  --eigen-error-light: #FEF2F2;
+  --eigen-success: #059669;
+  --eigen-warning: #D97706;
+
+  /* Typographie */
+  --eigen-font-primary: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --eigen-font-mono: 'Consolas', 'Monaco', monospace;
+
+  /* Ombres */
+  --eigen-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --eigen-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --eigen-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --eigen-shadow-card: 0 20px 60px rgba(0, 107, 60, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  /* Arrondis */
+  --eigen-radius-sm: 4px;
+  --eigen-radius: 8px;
+  --eigen-radius-lg: 12px;
+  --eigen-radius-xl: 16px;
+
+  /* Transitions */
+  --eigen-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Reset et base --------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--eigen-font-primary);
+  background: linear-gradient(135deg, #004D2B 0%, #006B3C 40%, #1A3A5C 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Motif géométrique subtil en arrière-plan */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* --- Conteneur principal de connexion -------------------------------------- */
+#kc-container-wrapper {
+  width: 100%;
+  max-width: 440px;
+  margin: 1.5rem;
+}
+
+.login-pf-page #kc-container-wrapper,
+.pf-c-page {
+  background: var(--eigen-white);
+  border-radius: var(--eigen-radius-xl);
+  box-shadow: var(--eigen-shadow-card);
+  overflow: hidden;
+}
+
+/* --- En-tête EIGEN --------------------------------------------------------- */
+.eigen-header {
+  background: linear-gradient(135deg, var(--eigen-secondary) 0%, var(--eigen-primary) 100%);
+  padding: 2rem 2rem 1.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.eigen-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--eigen-accent), var(--eigen-primary-light), var(--eigen-accent));
+}
+
+.eigen-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 0.75rem;
+}
+
+.eigen-logo-mark {
+  width: 48px;
+  height: 48px;
+  background: var(--eigen-accent);
+  color: var(--eigen-primary-dark);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 900;
+  font-family: var(--eigen-font-primary);
+  letter-spacing: -2px;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.eigen-logo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.eigen-logo-main {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--eigen-white);
+  letter-spacing: 4px;
+  line-height: 1;
+}
+
+.eigen-logo-sub {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.eigen-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* --- Formulaire ------------------------------------------------------------ */
+#kc-content-wrapper,
+.login-pf-page #kc-content-wrapper {
+  padding: 2rem;
+}
+
+.eigen-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--eigen-gray-600);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.2px;
+}
+
+.eigen-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.eigen-input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--eigen-gray-400);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.eigen-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px 0 40px;
+  border: 1.5px solid var(--eigen-gray-200);
+  border-radius: var(--eigen-radius);
+  font-size: 0.925rem;
+  color: var(--eigen-gray-900);
+  background: var(--eigen-gray-50);
+  transition: var(--eigen-transition);
+  font-family: var(--eigen-font-primary);
+}
+
+.eigen-input:focus {
+  outline: none;
+  border-color: var(--eigen-primary);
+  background: var(--eigen-white);
+  box-shadow: 0 0 0 3px rgba(0, 107, 60, 0.12);
+}
+
+.eigen-input::placeholder {
+  color: var(--eigen-gray-400);
+  font-size: 0.875rem;
+}
+
+.eigen-password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--eigen-gray-400);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: var(--eigen-radius-sm);
+  transition: var(--eigen-transition);
+}
+
+.eigen-password-toggle:hover {
+  color: var(--eigen-primary);
+  background: var(--eigen-primary-light);
+}
+
+/* État d'erreur */
+.has-error .eigen-input {
+  border-color: var(--eigen-error);
+  background: var(--eigen-error-light);
+}
+
+.has-error .eigen-input:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* --- Options de formulaire ------------------------------------------------- */
+.eigen-form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eigen-forgot-password a {
+  font-size: 0.8rem;
+  color: var(--eigen-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--eigen-transition);
+}
+
+.eigen-forgot-password a:hover {
+  color: var(--eigen-primary-dark);
+  text-decoration: underline;
+}
+
+/* --- Bouton de connexion --------------------------------------------------- */
+.eigen-btn-primary {
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(135deg, var(--eigen-primary) 0%, var(--eigen-primary-dark) 100%);
+  color: var(--eigen-white);
+  border: none;
+  border-radius: var(--eigen-radius);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: var(--eigen-transition);
+  font-family: var(--eigen-font-primary);
+  box-shadow: 0 4px 12px rgba(0, 107, 60, 0.35);
+}
+
+.eigen-btn-primary:hover {
+  background: linear-gradient(135deg, var(--eigen-primary-dark) 0%, #003520 100%);
+  box-shadow: 0 6px 16px rgba(0, 107, 60, 0.45);
+  transform: translateY(-1px);
+}
+
+.eigen-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 107, 60, 0.3);
+}
+
+.eigen-btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- Connexions sociales (établissements) ---------------------------------- */
+.eigen-divider {
+  border: none;
+  border-top: 1px solid var(--eigen-gray-200);
+  margin: 1.5rem 0 1rem;
+}
+
+.eigen-divider-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--eigen-gray-400);
+  margin: 0 0 1rem;
+  font-weight: 500;
+}
+
+.eigen-social-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.eigen-social-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px;
+  border: 1.5px solid var(--eigen-gray-200);
+  border-radius: var(--eigen-radius);
+  text-decoration: none;
+  color: var(--eigen-gray-600);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: var(--eigen-transition);
+  background: var(--eigen-gray-50);
+}
+
+.eigen-social-btn:hover {
+  border-color: var(--eigen-primary);
+  color: var(--eigen-primary);
+  background: var(--eigen-primary-light);
+}
+
+.eigen-social-icon {
+  display: flex;
+  align-items: center;
+  color: inherit;
+}
+
+/* --- Notice de sécurité ---------------------------------------------------- */
+.eigen-security-notice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--eigen-gray-400);
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--eigen-gray-100);
+}
+
+/* --- Messages d'erreur Keycloak ------------------------------------------- */
+.alert-error {
+  background: var(--eigen-error-light);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: var(--eigen-radius);
+  padding: 10px 14px;
+  color: var(--eigen-error);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.alert-success {
+  background: #ECFDF5;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+  border-radius: var(--eigen-radius);
+  padding: 10px 14px;
+  color: var(--eigen-success);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* --- Groupes de formulaire Keycloak (override) ----------------------------- */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Pied de page ---------------------------------------------------------- */
+.kc-page-footer {
+  text-align: center;
+  padding: 1rem 2rem;
+  font-size: 0.72rem;
+  color: var(--eigen-gray-400);
+  border-top: 1px solid var(--eigen-gray-100);
+}
+
+/* --- Responsive ------------------------------------------------------------ */
+@media (max-width: 480px) {
+  #kc-container-wrapper {
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .login-pf-page #kc-container-wrapper,
+  .pf-c-page {
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  #kc-content-wrapper,
+  .login-pf-page #kc-content-wrapper {
+    padding: 1.5rem;
+  }
+}

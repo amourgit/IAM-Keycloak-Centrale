@@ -1,0 +1,449 @@
+{
+  "realm": "eigen-national",
+  "displayName": "EIGEN — Système National d'Identité",
+  "displayNameHtml": "<div class='eigen-realm-name'><strong>EIGEN</strong> &mdash; Identité Nationale</div>",
+  "enabled": true,
+  "loginTheme": "eigen-central",
+  "accountTheme": "eigen-central",
+  "emailTheme": "eigen-central",
+  "adminTheme": "keycloak",
+  "internationalizationEnabled": true,
+  "supportedLocales": ["fr", "en"],
+  "defaultLocale": "fr",
+
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": false,
+  "rememberMe": false,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+
+  "accessTokenLifespan": 300,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespanEnabled": true,
+  "offlineSessionMaxLifespan": 5184000,
+  "clientSessionIdleTimeout": 1800,
+  "clientSessionMaxLifespan": 36000,
+  "refreshTokenMaxReuse": 0,
+  "revokeRefreshToken": true,
+
+  "roles": {
+    "realm": [
+      {
+        "name": "utilisateur_national",
+        "description": "Rôle de base attribué à tout utilisateur validé dans le système national EIGEN",
+        "composite": false
+      },
+      {
+        "name": "coordinateur_ministeriel",
+        "description": "Agent du Ministère autorisé à créer et gérer des comptes nationaux",
+        "composite": false
+      },
+      {
+        "name": "administrateur_systeme",
+        "description": "Administrateur technique du système EIGEN Central — accès total",
+        "composite": true,
+        "composites": {
+          "realm": ["utilisateur_national", "coordinateur_ministeriel"]
+        }
+      },
+      {
+        "name": "auditeur_national",
+        "description": "Accès en lecture seule aux journaux d'audit nationaux",
+        "composite": false
+      }
+    ]
+  },
+
+  "groups": [
+    {
+      "name": "EIGEN-National",
+      "path": "/EIGEN-National",
+      "subGroups": [
+        {
+          "name": "Etudiants-Nationaux",
+          "path": "/EIGEN-National/Etudiants-Nationaux",
+          "realmRoles": ["utilisateur_national"]
+        },
+        {
+          "name": "Enseignants-Nationaux",
+          "path": "/EIGEN-National/Enseignants-Nationaux",
+          "realmRoles": ["utilisateur_national"]
+        },
+        {
+          "name": "Personnels-Administratifs",
+          "path": "/EIGEN-National/Personnels-Administratifs",
+          "realmRoles": ["utilisateur_national"]
+        },
+        {
+          "name": "Coordinateurs-Ministeriel",
+          "path": "/EIGEN-National/Coordinateurs-Ministeriel",
+          "realmRoles": ["utilisateur_national", "coordinateur_ministeriel"]
+        }
+      ]
+    }
+  ],
+
+  "clients": [
+    {
+      "clientId": "portail-eigen",
+      "name": "Portail National EIGEN",
+      "description": "Client OIDC du portail national EIGEN — accès à l'authentification nationale",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": false,
+      "rootUrl": "https://portail.eigen.ga",
+      "baseUrl": "https://portail.eigen.ga",
+      "redirectUris": [
+        "https://portail.eigen.ga/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "https://portail.eigen.ga",
+        "http://localhost:3000"
+      ],
+      "defaultClientScopes": ["openid", "profile", "email", "eigen-national-claims"],
+      "optionalClientScopes": ["address", "phone"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "access.token.lifespan": "300",
+        "client.session.idle.timeout": "1800"
+      }
+    },
+    {
+      "clientId": "eigen-referentiel-service",
+      "name": "Service Référentiel EIGEN",
+      "description": "Service account utilisé par les Référentiels Locaux pour les opérations de provisioning national",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": false,
+      "secret": "${EIGEN_REFERENTIEL_CLIENT_SECRET}",
+      "defaultClientScopes": ["openid", "profile", "email"],
+      "optionalClientScopes": [],
+      "attributes": {
+        "access.token.lifespan": "60"
+      }
+    },
+    {
+      "clientId": "eigen-camel-service",
+      "name": "Service Apache Camel EIGEN",
+      "description": "Service account pour le pipeline d'intégration Apache Camel (imports CSV, synchronisations)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": false,
+      "secret": "${EIGEN_CAMEL_CLIENT_SECRET}",
+      "defaultClientScopes": ["openid", "profile", "email"],
+      "optionalClientScopes": [],
+      "attributes": {
+        "access.token.lifespan": "60"
+      }
+    }
+  ],
+
+  "clientScopes": [
+    {
+      "name": "eigen-national-claims",
+      "description": "Claims spécifiques au système EIGEN — identifiant national, type utilisateur",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "identifiant_national-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "identifiant_national",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "identifiant_national",
+            "jsonType.label": "String",
+            "multivalued": "false"
+          }
+        },
+        {
+          "name": "type_utilisateur-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "type_utilisateur",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "type_utilisateur",
+            "jsonType.label": "String",
+            "multivalued": "false"
+          }
+        },
+        {
+          "name": "date_naissance-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "date_naissance",
+            "id.token.claim": "false",
+            "access.token.claim": "false",
+            "claim.name": "date_naissance",
+            "jsonType.label": "String",
+            "multivalued": "false"
+          }
+        },
+        {
+          "name": "sexe-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "sexe",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "sexe",
+            "jsonType.label": "String",
+            "multivalued": "false"
+          }
+        },
+        {
+          "name": "nationalite-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "nationalite",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "nationalite",
+            "jsonType.label": "String",
+            "multivalued": "false"
+          }
+        },
+        {
+          "name": "realm-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "foo",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true"
+          }
+        }
+      ]
+    }
+  ],
+
+  "userProfile": {
+    "attributes": [
+      {
+        "name": "username",
+        "displayName": "Identifiant de connexion",
+        "validations": {
+          "length": {"min": 3, "max": 50},
+          "pattern": {"pattern": "^[a-z][a-z0-9._-]{2,49}$"}
+        },
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "email",
+        "displayName": "Adresse email nationale",
+        "validations": {
+          "email": {},
+          "pattern": {"pattern": "^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.ga$"}
+        },
+        "required": {"roles": ["user"]},
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "firstName",
+        "displayName": "Prénom",
+        "required": {"roles": ["user"]},
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "lastName",
+        "displayName": "Nom de famille",
+        "required": {"roles": ["user"]},
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "identifiant_national",
+        "displayName": "Identifiant National EIGEN",
+        "annotations": {"inputType": "text"},
+        "validations": {
+          "pattern": {"pattern": "^(ETU|ENS|PERS|DOC|VAC)-\\d{4}-\\d{5}$"},
+          "length": {"min": 15, "max": 20}
+        },
+        "required": {"roles": ["admin"]},
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "type_utilisateur",
+        "displayName": "Type d'utilisateur",
+        "annotations": {"inputType": "select", "inputOptionsFromValidation": "options"},
+        "validations": {
+          "options": {"options": ["etudiant", "enseignant", "personnel_admin", "vacataire", "doctorant", "moniteur"]}
+        },
+        "required": {"roles": ["admin"]},
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "date_naissance",
+        "displayName": "Date de naissance",
+        "annotations": {"inputType": "text"},
+        "validations": {
+          "pattern": {"pattern": "^\\d{4}-\\d{2}-\\d{2}$"}
+        },
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "sexe",
+        "displayName": "Sexe",
+        "annotations": {"inputType": "select"},
+        "validations": {
+          "options": {"options": ["M", "F"]}
+        },
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "nationalite",
+        "displayName": "Nationalité",
+        "annotations": {"inputType": "text"},
+        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
+      },
+      {
+        "name": "telephone",
+        "displayName": "Téléphone",
+        "annotations": {"inputType": "tel"},
+        "validations": {
+          "pattern": {"pattern": "^\\+?[0-9\\s\\-]{8,20}$"}
+        },
+        "permissions": {"view": ["admin", "user"], "edit": ["admin", "user"]}
+      }
+    ]
+  },
+
+  "passwordPolicy": "length(12) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and notUsername() and notEmail() and passwordHistory(5)",
+
+  "smtpServer": {
+    "host": "${SMTP_HOST}",
+    "port": "${SMTP_PORT:-587}",
+    "from": "noreply@eigen.ga",
+    "fromDisplayName": "EIGEN — Identité Nationale",
+    "replyTo": "support@eigen.ga",
+    "replyToDisplayName": "Support EIGEN",
+    "ssl": "false",
+    "starttls": "true",
+    "auth": "true",
+    "user": "${SMTP_USER}",
+    "password": "${SMTP_PASSWORD}"
+  },
+
+  "eventsEnabled": true,
+  "eventsListeners": ["jboss-logging", "eigen-kafka-event-listener"],
+  "enabledEventTypes": [
+    "LOGIN", "LOGIN_ERROR", "LOGOUT", "LOGOUT_ERROR",
+    "REGISTER", "REGISTER_ERROR",
+    "CODE_TO_TOKEN", "CODE_TO_TOKEN_ERROR",
+    "REFRESH_TOKEN", "REFRESH_TOKEN_ERROR",
+    "UPDATE_PASSWORD", "UPDATE_PASSWORD_ERROR",
+    "UPDATE_PROFILE", "UPDATE_PROFILE_ERROR",
+    "SEND_RESET_PASSWORD", "SEND_VERIFY_EMAIL",
+    "VERIFY_EMAIL", "VERIFY_EMAIL_ERROR",
+    "IDENTITY_PROVIDER_LOGIN", "IDENTITY_PROVIDER_FIRST_LOGIN",
+    "CLIENT_LOGIN", "CLIENT_LOGIN_ERROR",
+    "INTROSPECT_TOKEN", "INTROSPECT_TOKEN_ERROR",
+    "TOKEN_EXCHANGE", "TOKEN_EXCHANGE_ERROR",
+    "IMPERSONATE", "IMPERSONATE_ERROR"
+  ],
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
+  "eventsExpiration": 2592000,
+
+  "requiredActions": [
+    {
+      "alias": "CONFIGURE_TOTP",
+      "name": "Configure OTP",
+      "providerId": "CONFIGURE_TOTP",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 10
+    },
+    {
+      "alias": "UPDATE_PASSWORD",
+      "name": "Update Password",
+      "providerId": "UPDATE_PASSWORD",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 20
+    },
+    {
+      "alias": "VERIFY_EMAIL",
+      "name": "Verify Email",
+      "providerId": "VERIFY_EMAIL",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 30
+    },
+    {
+      "alias": "UPDATE_PROFILE",
+      "name": "Update Profile",
+      "providerId": "UPDATE_PROFILE",
+      "enabled": true,
+      "defaultAction": false,
+      "priority": 40
+    }
+  ],
+
+  "browserSecurityHeaders": {
+    "contentSecurityPolicyReportOnly": "",
+    "xContentTypeOptions": "nosniff",
+    "xRobotsTag": "noindex, nofollow",
+    "xFrameOptions": "SAMEORIGIN",
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none'; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:",
+    "xXSSProtection": "1; mode=block",
+    "strictTransportSecurity": "max-age=31536000; includeSubDomains; preload"
+  }
+}

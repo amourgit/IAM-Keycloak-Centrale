@@ -1,0 +1,40 @@
+# =============================================================================
+# EIGEN IAM — .gitignore :: IAM-Keycloak-Centrale
+# =============================================================================
+
+# Secrets — NE JAMAIS committer
+.env
+*.env.local
+*.env.production
+secrets/
+vault-tokens/
+
+# Build Maven
+keycloak/extensions/**/target/
+keycloak/extensions/**/*.class
+
+# Données persistantes Docker (volumes montés localement pour dev)
+data/
+postgres-data/
+kafka-data/
+zookeeper-data/
+
+# Logs
+logs/
+*.log
+
+# Fichiers de configuration Keycloak générés
+keycloak/data/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Fichiers temporaires
+*.tmp
+*.bak
+*.orig
