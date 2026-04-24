@@ -204,8 +204,7 @@ services:
       kafka-central:
         condition: service_healthy
     command:
-      - start
-      - --optimized
+      - start-dev
       - --import-realm
     environment:
       # --- Base de données ---
@@ -222,8 +221,8 @@ services:
 
       # --- Réseau et proxy ---
       KC_HOSTNAME: ${KC_HOSTNAME:-sso.eigen.ga}
-      KC_HOSTNAME_STRICT: "true"
-      KC_HOSTNAME_STRICT_HTTPS: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HTTP_ENABLED: "true"
       KC_HTTP_PORT: 8080
       KC_HTTPS_PORT: 8443

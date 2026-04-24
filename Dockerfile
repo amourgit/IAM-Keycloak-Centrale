@@ -38,6 +38,12 @@ LABEL eigen.tier="national"
 # Copier le SPI Kafka compilé
 COPY --from=spi-builder /build/target/eigen-kafka-listener-*.jar /opt/keycloak/providers/
 
+# Installer curl et télécharger le driver PostgreSQL nécessaire pour Keycloak 24.0.5
+RUN apt-get update && apt-get install -y curl && \
+    curl -L -o /opt/keycloak/providers/postgresql-42.7.3.jar \
+    https://jdbc.postgresql.org/download/postgresql-42.7.3.jar && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Copier le thème EIGEN Central
 COPY keycloak/themes/eigen-central /opt/keycloak/themes/eigen-central
 

@@ -275,92 +275,17 @@
     }
   ],
 
-  "userProfile": {
-    "attributes": [
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
       {
-        "name": "username",
-        "displayName": "Identifiant de connexion",
-        "validations": {
-          "length": {"min": 3, "max": 50},
-          "pattern": {"pattern": "^[a-z][a-z0-9._-]{2,49}$"}
-        },
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "email",
-        "displayName": "Adresse email nationale",
-        "validations": {
-          "email": {},
-          "pattern": {"pattern": "^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.ga$"}
-        },
-        "required": {"roles": ["user"]},
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "firstName",
-        "displayName": "Prénom",
-        "required": {"roles": ["user"]},
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "lastName",
-        "displayName": "Nom de famille",
-        "required": {"roles": ["user"]},
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "identifiant_national",
-        "displayName": "Identifiant National EIGEN",
-        "annotations": {"inputType": "text"},
-        "validations": {
-          "pattern": {"pattern": "^(ETU|ENS|PERS|DOC|VAC)-\\d{4}-\\d{5}$"},
-          "length": {"min": 15, "max": 20}
-        },
-        "required": {"roles": ["admin"]},
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "type_utilisateur",
-        "displayName": "Type d'utilisateur",
-        "annotations": {"inputType": "select", "inputOptionsFromValidation": "options"},
-        "validations": {
-          "options": {"options": ["etudiant", "enseignant", "personnel_admin", "vacataire", "doctorant", "moniteur"]}
-        },
-        "required": {"roles": ["admin"]},
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "date_naissance",
-        "displayName": "Date de naissance",
-        "annotations": {"inputType": "text"},
-        "validations": {
-          "pattern": {"pattern": "^\\d{4}-\\d{2}-\\d{2}$"}
-        },
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "sexe",
-        "displayName": "Sexe",
-        "annotations": {"inputType": "select"},
-        "validations": {
-          "options": {"options": ["M", "F"]}
-        },
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "nationalite",
-        "displayName": "Nationalité",
-        "annotations": {"inputType": "text"},
-        "permissions": {"view": ["admin", "user"], "edit": ["admin"]}
-      },
-      {
-        "name": "telephone",
-        "displayName": "Téléphone",
-        "annotations": {"inputType": "tel"},
-        "validations": {
-          "pattern": {"pattern": "^\\+?[0-9\\s\\-]{8,20}$"}
-        },
-        "permissions": {"view": ["admin", "user"], "edit": ["admin", "user"]}
+        "name": "declarative-user-profile",
+        "providerId": "declarative-user-profile",
+        "subType": "default",
+        "config": {
+          "config": [
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"Identifiant de connexion\",\"validations\":{\"length\":{\"min\":3,\"max\":50},\"pattern\":{\"pattern\":\"^[a-z][a-z0-9._-]{2,49}$\"}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"email\",\"displayName\":\"Adresse email nationale\",\"validations\":{\"email\":{},\"pattern\":{\"pattern\":\"^[a-zA-Z0-9._%+\\\\-]+@[a-zA-Z0-9.\\\\-]+\\\\.ga$\"}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"firstName\",\"displayName\":\"Prénom\",\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"lastName\",\"displayName\":\"Nom de famille\",\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"identifiant_national\",\"displayName\":\"Identifiant National EIGEN\",\"annotations\":{\"inputType\":\"text\"},\"validations\":{\"pattern\":{\"pattern\":\"^(ETU|ENS|PERS|DOC|VAC)-\\\\d{4}-\\\\d{5}$\"},\"length\":{\"min\":15,\"max\":20}},\"required\":{\"roles\":[\"admin\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"type_utilisateur\",\"displayName\":\"Type d'utilisateur\",\"annotations\":{\"inputType\":\"select\",\"inputOptionsFromValidation\":\"options\"},\"validations\":{\"options\":{\"options\":[\"etudiant\",\"enseignant\",\"personnel_admin\",\"vacataire\",\"doctorant\",\"moniteur\"]}},\"required\":{\"roles\":[\"admin\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"date_naissance\",\"displayName\":\"Date de naissance\",\"annotations\":{\"inputType\":\"text\"},\"validations\":{\"pattern\":{\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"sexe\",\"displayName\":\"Sexe\",\"annotations\":{\"inputType\":\"select\"},\"validations\":{\"options\":{\"options\":[\"M\",\"F\"]}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"nationalite\",\"displayName\":\"Nationalité\",\"annotations\":{\"inputType\":\"text\"},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\"]}},{\"name\":\"telephone\",\"displayName\":\"Téléphone\",\"annotations\":{\"inputType\":\"tel\"},\"validations\":{\"pattern\":{\"pattern\":\"^\\\\+?[0-9\\\\s\\\\-]{8,20}$\"}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]}}]}"
+          ]
+        }
       }
     ]
   },

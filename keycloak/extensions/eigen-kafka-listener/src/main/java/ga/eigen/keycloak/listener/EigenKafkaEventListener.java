@@ -323,9 +323,12 @@ public class EigenKafkaEventListener implements EventListenerProvider {
      * Récupère un attribut mono-valué d'un utilisateur Keycloak.
      */
     private Optional<String> getAttribut(UserModel user, String nomAttribut) {
-        List<String> valeurs = user.getAttribute(nomAttribut);
-        if (valeurs != null && !valeurs.isEmpty()) {
-            return Optional.ofNullable(valeurs.get(0));
+        Map<String, List<String>> attributes = user.getAttributes();
+        if (attributes != null) {
+            List<String> valeurs = attributes.get(nomAttribut);
+            if (valeurs != null && !valeurs.isEmpty()) {
+                return Optional.ofNullable(valeurs.get(0));
+            }
         }
         return Optional.empty();
     }
